@@ -18,16 +18,16 @@ app = FastAPI(
     description="Connecting blood donors with hospitals in real time.",
     version="1.0.0",
 )
-app.mount("/app", StaticFiles(directory="blood-donation", html=True), name="frontend")
-app.include_router(donor_router)
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # Tighten in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(donor_router)
+app.mount("/app", StaticFiles(directory="blood-donation", html=True), name="frontend")
 
 # ── Password Hashing ───────────────────────────────────────────────────────────
 
