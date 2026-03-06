@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register — BloodBridge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --red: #c0392b; --red-deep: #96281b; --cream: #faf7f2; --cream-dark: #f0ebe0; --ink: #6d0d05; --ink-mid: #4a3f35; --ink-light: #8a7a6e; --border: #ddd5c8; }
+    html, body { min-height: 100%; font-family: 'Instrument Sans', sans-serif; background: var(--cream); color: var(--ink); }
+    body::after { content: ''; position: fixed; inset: 0; z-index: 999; pointer-events: none; opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+    nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 16px 48px; background: var(--cream); border-bottom: 1.5px solid var(--border); }
+    .nav-brand { display: flex; align-items: center; gap: 8px; font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); text-decoration: none; }
+
+    .page { display: flex; min-height: calc(100vh - 57px); }
+
+    /* left side panel */
+    .side { width: 380px; flex-shrink: 0; background: var(--ink); color: var(--cream); padding: 56px 44px; display: flex; flex-direction: column; justify-content: space-between; }
+    .side-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.5px; margin-bottom: 16px; }
+    .side-title em { font-style: italic; color: #fc8181; }
+    .side-sub { font-size: 0.875rem; color: rgba(250,247,242,0.5); line-height: 1.65; margin-bottom: 40px; }
+    .side-fact { border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 24px; }
+    .side-fact p { font-size: 0.82rem; color: rgba(250,247,242,0.38); line-height: 1.6; font-style: italic; }
+    .side-fact strong { color: rgba(250,247,242,0.65); font-style: normal; }
+
+    /* form side */
+    .form-side { flex: 1; padding: 56px 64px; display: flex; flex-direction: column; justify-content: center; max-width: 520px; }
+
+    .form-title { font-family: 'Fraunces', serif; font-size: 1.7rem; font-weight: 600; letter-spacing: -0.4px; margin-bottom: 6px; }
+    .form-sub { font-size: 0.875rem; color: var(--ink-light); margin-bottom: 36px; }
+
+    .role-row { display: flex; gap: 10px; margin-bottom: 24px; }
+    .role-opt { flex: 1; border: 1.5px solid var(--border); border-radius: 9px; padding: 14px 12px; text-align: center; cursor: pointer; transition: all 0.18s; background: #fff; }
+    .role-opt:hover { border-color: var(--ink-mid); }
+    .role-opt.active { border-color: var(--ink); background: var(--ink); color: var(--cream); }
+    .role-opt .ri { font-size: 1.3rem; display: block; margin-bottom: 4px; }
+    .role-opt .rl { font-size: 0.82rem; font-weight: 600; }
+
+    .field { margin-bottom: 18px; }
+    label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-mid); margin-bottom: 7px; }
+    input { width: 100%; padding: 12px 14px; background: #fff; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Instrument Sans', sans-serif; font-size: 0.92rem; color: var(--ink); outline: none; transition: border-color 0.18s, box-shadow 0.18s; }
+    input::placeholder { color: #b8a898; }
+    input:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(28,20,16,0.07); }
+
+    .submit-btn { width: 100%; padding: 14px; background: var(--red); color: #fff; border: none; border-radius: 8px; font-family: 'Instrument Sans', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 6px; box-shadow: 0 2px 0 var(--red-deep); transition: all 0.18s; }
+    .submit-btn:hover { background: var(--red-deep); transform: translateY(-1px); box-shadow: 0 4px 0 var(--red-deep); }
+    .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .alert { padding: 12px 14px; border-radius: 8px; font-size: 0.85rem; margin-top: 14px; display: none; gap: 8px; align-items: flex-start; }
+    .alert.show { display: flex; }
+    .alert.success { background: #f0faf4; border: 1.5px solid #a7d7b5; color: #276744; }
+    .alert.error   { background: #fdf2f2; border: 1.5px solid #f5c0bb; color: #9b2c2c; }
+
+    .login-link { text-align: center; margin-top: 22px; font-size: 0.85rem; color: var(--ink-light); }
+    .login-link a { color: var(--red); text-decoration: none; font-weight: 600; }
+    .login-link a:hover { text-decoration: underline; }
+
+    @media (max-width: 760px) {
+      nav { padding: 13px 18px; }
+      .page { flex-direction: column; }
+      .side { width: 100%; padding: 32px 20px; }
+      .side-fact { display: none; }
+      .form-side { padding: 32px 20px; max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-brand">🩸 BloodBridge</a>
+  </nav>
+
+  <div class="page">
+    <div class="side">
+      <div>
+        <div class="form-title" style="font-family:'Fraunces',serif; font-size:1.9rem; font-weight:700; line-height:1.1; letter-spacing:-0.5px; margin-bottom:14px;">Join the <em style="font-style:italic; color:#fc8181">network</em> that saves lives</div>
+        <p style="font-size:0.875rem; color:rgba(250,247,242,0.5); line-height:1.65;">Every donor on BloodBridge is a lifeline for someone in an emergency. It takes 2 minutes to register.</p>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:24px; margin-top:40px;">
+        <p style="font-size:0.82rem; color:rgba(250,247,242,0.38); line-height:1.65; font-style:italic;">"One blood donation can save up to <strong style='color:rgba(250,247,242,0.65); font-style:normal'>three lives</strong>. About <strong style='color:rgba(250,247,242,0.65); font-style:normal'>38%</strong> of the population is eligible to donate — but only about 6.8% do."</p>
+      </div>
+    </div>
+
+    <div class="form-side">
+      <div class="form-title">Create your account</div>
+      <div class="form-sub">Already registered? <a href="login.html" style="color:var(--red); text-decoration:none; font-weight:600;">Log in →</a></div>
+
+      <div class="role-row">
+        <div class="role-opt active" data-role="donor" onclick="selectRole('donor')"><span class="ri">💉</span><span class="rl">Donor</span></div>
+        <div class="role-opt" data-role="hospital" onclick="selectRole('hospital')"><span class="ri">🏥</span><span class="rl">Hospital</span></div>
+      </div>
+      <input type="hidden" id="role" value="donor"/>
+
+      <div class="field"><label>Full Name</label><input type="text" id="name" placeholder="Jane Doe" autocomplete="name"/></div>
+      <div class="field"><label>Email Address</label><input type="email" id="email" placeholder="jane@example.com" autocomplete="email"/></div>
+      <div class="field"><label>Password</label><input type="password" id="password" placeholder="At least 8 characters" autocomplete="new-password"/></div>
+
+      <button class="submit-btn" id="submitBtn" onclick="handleRegister()">Create account →</button>
+
+      <div class="alert" id="alertBox"><span id="alertMsg"></span></div>
+    </div>
+  </div>
+
+  <script>
+    const p = new URLSearchParams(location.search);
+    if (p.get('role') === 'hospital') selectRole('hospital');
+
+    function selectRole(role) {
+      document.getElementById('role').value = role;
+      document.querySelectorAll('.role-opt').forEach(el => el.classList.toggle('active', el.dataset.role === role));
+    }
+    function showAlert(type, msg) {
+      const b = document.getElementById('alertBox');
+      b.className = `alert show ${type}`;
+      document.getElementById('alertMsg').textContent = msg;
+    }
+    async function handleRegister() {
+      const btn = document.getElementById('submitBtn');
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+      if (!name || !email || !password) { showAlert('error', 'Please fill in all fields.'); return; }
+      if (password.length < 8) { showAlert('error', 'Password must be at least 8 characters.'); return; }
+      btn.disabled = true; btn.textContent = 'Creating account…';
+      try {
+        const res = await fetch('https://bloodbridge-xz4x.onrender.com/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password, role }) });
+        const data = await res.json();
+        if (res.ok) { showAlert('success', 'Account created! Redirecting to login…'); setTimeout(() => window.location.href = 'login.html', 1800); }
+        else { showAlert('error', data.detail || data.message || 'Registration failed.'); btn.disabled = false; btn.textContent = 'Create account →'; }
+      } catch { showAlert('error', 'Could not reach the server.'); btn.disabled = false; btn.textContent = 'Create account →'; }
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') handleRegister(); });
+  </script>
+</body>
+</html>

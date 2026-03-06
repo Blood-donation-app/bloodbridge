@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Find Blood — BloodBridge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --red: #c0392b; --red-deep: #96281b; --cream: #faf7f2; --cream-dark: #f0ebe0; --ink: #1c1410; --ink-mid: #4a3f35; --ink-light: #8a7a6e; --border: #ddd5c8; }
+    html, body { min-height: 100%; font-family: 'Instrument Sans', sans-serif; background: var(--cream); color: var(--ink); }
+    body::after { content: ''; position: fixed; inset: 0; z-index: 999; pointer-events: none; opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+    nav { position: sticky; top: 0; z-index: 200; display: flex; align-items: center; justify-content: space-between; padding: 16px 48px; background: var(--cream); border-bottom: 1.5px solid var(--border); }
+    .nav-brand { display: flex; align-items: center; gap: 8px; font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); text-decoration: none; }
+    .nav-links { display: flex; gap: 2px; }
+    .nav-links a { padding: 7px 15px; border-radius: 6px; font-size: 0.875rem; font-weight: 500; text-decoration: none; color: var(--ink-mid); transition: all 0.16s; }
+    .nav-links a:hover { background: var(--cream-dark); color: var(--ink); }
+    .nav-links a.active { background: var(--cream-dark); color: var(--ink); font-weight: 600; }
+
+    .page { max-width: 900px; margin: 0 auto; padding: 52px 24px 60px; }
+
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 32px; }
+    .page-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+    .page-title em { font-style: italic; color: var(--red); }
+    .page-sub { font-size: 0.875rem; color: var(--ink-light); margin-top: 4px; }
+
+    .emerg-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: #fdf2f2; border: 1.5px solid #f5c0bb; border-radius: 8px; color: var(--red); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.18s; white-space: nowrap; }
+    .emerg-btn:hover { background: #fce8e6; border-color: var(--red); }
+    .emerg-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); animation: ep 1.4s ease infinite; }
+    @keyframes ep { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* SEARCH BAR */
+    .search-bar { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 20px 22px; display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 32px; box-shadow: 0 2px 12px rgba(28,20,16,0.05); }
+    .sf { flex: 1; min-width: 150px; }
+    label { display: block; font-size: 0.73rem; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-mid); margin-bottom: 7px; }
+    input, select { width: 100%; padding: 11px 13px; background: var(--cream); border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Instrument Sans', sans-serif; font-size: 0.9rem; color: var(--ink); outline: none; transition: border-color 0.18s; appearance: none; -webkit-appearance: none; }
+    input::placeholder { color: #b8a898; }
+    input:focus, select:focus { border-color: var(--ink); background: #fff; }
+    select option { background: #fff; }
+    .sw { position: relative; }
+    .sw::after { content: '▾'; position: absolute; right: 11px; top: 50%; transform: translateY(-50%); color: var(--ink-light); pointer-events: none; font-size: 0.85rem; }
+
+    .search-btn { padding: 11px 24px; background: var(--ink); color: var(--cream); border: none; border-radius: 8px; font-family: 'Instrument Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.18s; box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+    .search-btn:hover { background: #2d2018; transform: translateY(-1px); }
+    .search-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* RESULTS */
+    .results-meta { font-size: 0.82rem; color: var(--ink-light); margin-bottom: 16px; }
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px,1fr)); gap: 14px; }
+
+    .donor-card { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 20px 22px; transition: box-shadow 0.18s, transform 0.18s; }
+    .donor-card:hover { box-shadow: 0 6px 24px rgba(28,20,16,0.1); transform: translateY(-2px); }
+
+    .dc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .dc-blood { font-family: 'Fraunces', serif; font-size: 1.9rem; font-weight: 700; color: var(--red); line-height: 1; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 100px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+    .badge.avail { background: #f0faf4; color: #276744; border: 1.5px solid #a7d7b5; }
+    .badge.unavail { background: var(--cream-dark); color: var(--ink-light); border: 1.5px solid var(--border); }
+    .bdot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+    .dc-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 6px; }
+    .dc-meta { font-size: 0.82rem; color: var(--ink-light); display: flex; flex-direction: column; gap: 3px; }
+
+    /* STATES */
+    .state-box { text-align: center; padding: 72px 24px; color: var(--ink-light); display: none; }
+    .state-box.show { display: block; }
+    .state-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .state-title { font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 600; color: var(--ink-mid); margin-bottom: 6px; }
+    .state-sub { font-size: 0.875rem; }
+    .spin-wrap { width: 32px; height: 32px; margin: 0 auto 14px; border: 2.5px solid var(--border); border-top-color: var(--ink); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* MODAL */
+    .overlay { position: fixed; inset: 0; z-index: 500; background: rgba(28,20,16,0.45); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.22s; }
+    .overlay.open { opacity: 1; pointer-events: all; }
+    .modal { width: 100%; max-width: 460px; background: #fff; border: 1.5px solid var(--border); border-radius: 18px; padding: 36px 32px; box-shadow: 0 20px 60px rgba(28,20,16,0.18); transform: translateY(16px) scale(0.97); transition: transform 0.25s cubic-bezier(0.34,1.4,0.64,1); max-height: 92vh; overflow-y: auto; }
+    .overlay.open .modal { transform: translateY(0) scale(1); }
+
+    .modal-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .modal-title { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.3px; }
+    .modal-title em { font-style: italic; color: var(--red); }
+    .modal-close { background: var(--cream-dark); border: 1.5px solid var(--border); color: var(--ink-mid); width: 30px; height: 30px; border-radius: 7px; font-size: 0.85rem; cursor: pointer; transition: all 0.16s; display: flex; align-items: center; justify-content: center; }
+    .modal-close:hover { background: #fdf2f2; border-color: #f5c0bb; color: var(--red); }
+
+    .mf { margin-bottom: 16px; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .urgency-row { display: flex; gap: 8px; }
+    .up { flex: 1; padding: 10px 6px; text-align: center; border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.78rem; font-weight: 600; color: var(--ink-mid); background: var(--cream); transition: all 0.15s; user-select: none; }
+    .up:hover { border-color: var(--ink-mid); }
+    .up.active.normal   { border-color: #4ade80; color: #166534; background: #f0fdf4; }
+    .up.active.urgent   { border-color: #fb923c; color: #9a3412; background: #fff7ed; }
+    .up.active.emergency { border-color: var(--red); color: var(--red); background: #fdf2f2; }
+
+    .modal-submit { width: 100%; padding: 14px; background: var(--red); color: #fff; border: none; border-radius: 9px; font-family: 'Instrument Sans', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 6px; box-shadow: 0 2px 0 var(--red-deep); transition: all 0.18s; }
+    .modal-submit:hover { background: var(--red-deep); transform: translateY(-1px); }
+    .modal-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .m-alert { padding: 11px 13px; border-radius: 8px; font-size: 0.83rem; margin-top: 12px; display: none; gap: 7px; align-items: center; }
+    .m-alert.show { display: flex; }
+    .m-alert.success { background: #f0faf4; border: 1.5px solid #a7d7b5; color: #276744; }
+    .m-alert.error   { background: #fdf2f2; border: 1.5px solid #f5c0bb; color: #9b2c2c; }
+
+    .modal-success { text-align: center; padding: 24px 0; }
+    .ms-icon { font-size: 3rem; margin-bottom: 14px; }
+    .ms-title { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+    .ms-title em { font-style: italic; color: var(--red); }
+    .ms-sub { font-size: 0.875rem; color: var(--ink-light); line-height: 1.6; }
+
+    @media (max-width: 600px) {
+      nav { padding: 13px 18px; }
+      .page { padding-top: 36px; }
+      .search-bar { padding: 16px; }
+      .modal { padding: 28px 20px; }
+      .two { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-brand">🩸 BloodBridge</a>
+    <div class="nav-links">
+      <a href="search.html" class="active">Find Blood</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="donor_profile.html">My Profile</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Find <em>donors</em></div>
+        <div class="page-sub">Search verified blood donors by type and location.</div>
+      </div>
+      <button class="emerg-btn" onclick="openModal()"><span class="emerg-dot"></span>Emergency Request</button>
+    </div>
+
+    <div class="search-bar">
+      <div class="sf"><label>Blood Type</label><div class="sw"><select id="blood_type"><option value="">All types</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div></div>
+      <div class="sf"><label>City</label><input type="text" id="city" placeholder="e.g. Mumbai" onkeydown="if(event.key==='Enter')doSearch()"/></div>
+      <button class="search-btn" id="searchBtn" onclick="doSearch()">Search →</button>
+    </div>
+
+    <div id="loadingState" class="state-box"><div class="spin-wrap"></div><div class="state-sub">Searching donors…</div></div>
+    <div id="emptyState" class="state-box"><div class="state-icon">🔍</div><div class="state-title">No donors found</div><div class="state-sub" id="emptySub">Try a different blood type or city.</div></div>
+    <div id="promptState" class="state-box show"><div class="state-icon">🩸</div><div class="state-title">Search for donors</div><div class="state-sub">Select a blood type and/or city above to get started.</div></div>
+
+    <div id="resultsMeta" class="results-meta" style="display:none"></div>
+    <div id="resultsGrid" class="results-grid"></div>
+  </div>
+
+  <!-- EMERGENCY MODAL -->
+  <div class="overlay" id="overlay" onclick="oClick(event)">
+    <div class="modal" id="modalBox">
+      <div class="modal-hd">
+        <div class="modal-title"><em>Emergency</em> Request</div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div id="mForm">
+        <div class="mf"><label>Hospital / Requester Name</label><input type="text" id="m_hospital" placeholder="City General Hospital"/></div>
+        <div class="two">
+          <div class="mf"><label>Blood Type Needed</label><div class="sw"><select id="m_blood"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div></div>
+          <div class="mf"><label>Units Needed</label><input type="number" id="m_units" placeholder="e.g. 2" min="1" max="50"/></div>
+        </div>
+        <div class="mf"><label>City</label><input type="text" id="m_city" placeholder="e.g. Mumbai"/></div>
+        <div class="mf">
+          <label>Urgency</label>
+          <div class="urgency-row">
+            <div class="up normal active" data-u="Normal" onclick="selUrgency(this)">🟢 Normal</div>
+            <div class="up urgent" data-u="Urgent" onclick="selUrgency(this)">🟠 Urgent</div>
+            <div class="up emergency" data-u="Emergency" onclick="selUrgency(this)">🔴 Emergency</div>
+          </div>
+          <input type="hidden" id="m_urgency" value="Normal"/>
+        </div>
+        <button class="modal-submit" id="mSubmit" onclick="submitReq()">Send request →</button>
+        <div class="m-alert" id="mAlert"></div>
+      </div>
+      <div class="modal-success" id="mSuccess" style="display:none">
+        <div class="ms-icon">✅</div>
+        <div class="ms-title">Request <em>sent!</em></div>
+        <p class="ms-sub">Matching donors will be contacted immediately.<br/>Stay by your phone.</p>
+        <button onclick="closeModal()" style="margin-top:20px;padding:10px 24px;background:var(--ink);color:var(--cream);border:none;border-radius:8px;font-family:'Instrument Sans',sans-serif;font-weight:600;cursor:pointer;font-size:0.875rem;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function doSearch() {
+      const bt = document.getElementById('blood_type').value;
+      const city = document.getElementById('city').value.trim();
+      const btn = document.getElementById('searchBtn');
+      showState('loading'); btn.disabled = true; btn.textContent = '…';
+      try {
+        const p = new URLSearchParams();
+        if (bt) p.append('blood_type', bt);
+        if (city) p.append('city', city);
+        const res = await fetch(`https://bloodbridge-xz4x.onrender.com/donors?${p}`);
+        const donors = await res.json();
+        btn.disabled = false; btn.textContent = 'Search →';
+        if (!Array.isArray(donors) || donors.length === 0) { showState('empty'); return; }
+        renderDonors(donors, bt, city);
+      } catch {
+        btn.disabled = false; btn.textContent = 'Search →';
+        showState('empty'); document.getElementById('emptySub').textContent = 'Server unreachable. Is the backend running?';
+      }
+    }
+
+    function renderDonors(donors, bt, city) {
+      showState('none');
+      const avail = donors.filter(d => d.available || d.is_available).length;
+      document.getElementById('resultsMeta').style.display = 'block';
+      document.getElementById('resultsMeta').innerHTML = `${donors.length} donor${donors.length!==1?'s':''} found${bt?` · <strong>${bt}</strong>`:''}${city?` in <strong>${city}</strong>`:''} &nbsp;·&nbsp; ${avail} available`;
+      document.getElementById('resultsGrid').innerHTML = donors.map((d,i) => {
+        const a = d.available || d.is_available;
+        return `<div class="donor-card" style="animation:fadeup 0.3s ${i*0.04}s ease both">
+          <div class="dc-top">
+            <div class="dc-blood">${d.blood_type||d.bloodType||'?'}</div>
+            <span class="badge ${a?'avail':'unavail'}"><span class="bdot"></span>${a?'Available':'Unavailable'}</span>
+          </div>
+          <div class="dc-name">${d.name||d.full_name||'Anonymous Donor'}</div>
+          <div class="dc-meta">
+            <span>📍 ${d.city||'—'}</span>
+            <span>📞 ${d.phone||'—'}</span>
+            ${d.last_donated?`<span>💉 Last donated ${d.last_donated}</span>`:''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function showState(s) {
+      ['loadingState','emptyState','promptState'].forEach(id => document.getElementById(id).classList.toggle('show', id.startsWith(s)));
+      document.getElementById('resultsMeta').style.display = 'none';
+      document.getElementById('resultsGrid').innerHTML = '';
+      if (s==='empty') document.getElementById('emptySub').textContent = 'Try a different blood type or city.';
+    }
+
+    function openModal() { document.getElementById('overlay').classList.add('open'); document.body.style.overflow='hidden'; }
+    function closeModal() {
+      document.getElementById('overlay').classList.remove('open'); document.body.style.overflow='';
+      setTimeout(() => { document.getElementById('mForm').style.display='block'; document.getElementById('mSuccess').style.display='none'; document.getElementById('mAlert').className='m-alert'; document.getElementById('mSubmit').disabled=false; document.getElementById('mSubmit').textContent='Send request →'; }, 280);
+    }
+    function oClick(e) { if(e.target===document.getElementById('overlay')) closeModal(); }
+    function selUrgency(el) { document.querySelectorAll('.up').forEach(p=>p.classList.remove('active')); el.classList.add('active'); document.getElementById('m_urgency').value=el.dataset.u; }
+    function showMAlert(t,m) { const el=document.getElementById('mAlert'); el.className=`m-alert show ${t}`; el.textContent=m; }
+
+    async function submitReq() {
+      const btn=document.getElementById('mSubmit');
+      const hospital=document.getElementById('m_hospital').value.trim();
+      const blood_type=document.getElementById('m_blood').value;
+      const units=document.getElementById('m_units').value;
+      const city=document.getElementById('m_city').value.trim();
+      const urgency=document.getElementById('m_urgency').value;
+      if (!hospital||!blood_type||!city) { showMAlert('error','Please fill in Hospital, Blood Type, and City.'); return; }
+      btn.disabled=true; btn.textContent='Sending…';
+      try {
+        const res=await fetch('https://bloodbridge-xz4x.onrender.com/blood-requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hospital_name:hospital,blood_type,city,units_needed:units?parseInt(units):1,urgency})});
+        if (res.ok) { document.getElementById('mForm').style.display='none'; document.getElementById('mSuccess').style.display='block'; }
+        else { const d=await res.json(); showMAlert('error',d.detail||d.message||'Request failed.'); btn.disabled=false; btn.textContent='Send request →'; }
+      } catch { showMAlert('error','Cannot reach server.'); btn.disabled=false; btn.textContent='Send request →'; }
+    }
+    document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+  </script>
+  <style>@keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}</style>
+</body>
+</html>

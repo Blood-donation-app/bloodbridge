@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Donor Profile — BloodBridge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --red: #c0392b; --red-deep: #96281b; --cream: #faf7f2; --cream-dark: #f0ebe0; --ink: #1c1410; --ink-mid: #4a3f35; --ink-light: #8a7a6e; --border: #ddd5c8; }
+    html, body { min-height: 100%; font-family: 'Instrument Sans', sans-serif; background: var(--cream); color: var(--ink); }
+    body::after { content: ''; position: fixed; inset: 0; z-index: 999; pointer-events: none; opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+    nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 16px 48px; background: var(--cream); border-bottom: 1.5px solid var(--border); }
+    .nav-brand { display: flex; align-items: center; gap: 8px; font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); text-decoration: none; }
+    .nav-links { display: flex; gap: 2px; }
+    .nav-links a { padding: 7px 15px; border-radius: 6px; font-size: 0.875rem; font-weight: 500; text-decoration: none; color: var(--ink-mid); transition: all 0.16s; }
+    .nav-links a:hover { background: var(--cream-dark); color: var(--ink); }
+    .nav-links a.active { background: var(--cream-dark); color: var(--ink); font-weight: 600; }
+
+    .page { max-width: 640px; margin: 0 auto; padding: 56px 24px 60px; }
+
+    .steps { display: flex; align-items: center; gap: 0; margin-bottom: 44px; }
+    .step { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--ink-light); }
+    .step.done .step-dot { background: var(--ink); border-color: var(--ink); }
+    .step.done .step-dot::after { content: '✓'; color: #fff; font-size: 0.6rem; }
+    .step.active .step-dot { border-color: var(--red); }
+    .step.active { color: var(--ink); font-weight: 600; }
+    .step-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); background: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: var(--ink-light); flex-shrink: 0; }
+    .step-connector { flex: 1; height: 1px; background: var(--border); margin: 0 8px; }
+
+    .page-title { font-family: 'Fraunces', serif; font-size: 1.9rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+    .page-title em { font-style: italic; color: var(--red); }
+    .page-sub { font-size: 0.9rem; color: var(--ink-light); margin-bottom: 36px; line-height: 1.5; }
+
+    .bt-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 6px; }
+    .bt-btn { padding: 14px 8px; text-align: center; border: 1.5px solid var(--border); border-radius: 9px; cursor: pointer; font-size: 0.95rem; font-weight: 600; color: var(--ink-mid); background: #fff; transition: all 0.16s; user-select: none; }
+    .bt-btn:hover { border-color: var(--ink-mid); color: var(--ink); }
+    .bt-btn.active { border-color: var(--red); color: var(--red); background: #fdf2f2; }
+
+    .section-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-mid); margin-bottom: 10px; margin-top: 24px; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .field { margin-bottom: 0; }
+    label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-mid); margin-bottom: 7px; }
+
+    input { width: 100%; padding: 12px 14px; background: #fff; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Instrument Sans', sans-serif; font-size: 0.92rem; color: var(--ink); outline: none; transition: border-color 0.18s, box-shadow 0.18s; }
+    input::placeholder { color: #b8a898; }
+    input:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(28,20,16,0.07); }
+    input[type=date]::-webkit-calendar-picker-indicator { opacity: 0.4; cursor: pointer; }
+
+    .hint { font-size: 0.78rem; color: var(--ink-light); margin-top: 5px; }
+
+    .submit-btn { width: 100%; padding: 15px; background: var(--red); color: #fff; border: none; border-radius: 9px; font-family: 'Instrument Sans', sans-serif; font-size: 0.98rem; font-weight: 600; cursor: pointer; margin-top: 28px; box-shadow: 0 2px 0 var(--red-deep); transition: all 0.18s; }
+    .submit-btn:hover { background: var(--red-deep); transform: translateY(-1px); box-shadow: 0 4px 0 var(--red-deep); }
+    .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .alert { padding: 12px 14px; border-radius: 8px; font-size: 0.85rem; margin-top: 16px; display: none; gap: 8px; align-items: center; }
+    .alert.show { display: flex; }
+    .alert.success { background: #f0faf4; border: 1.5px solid #a7d7b5; color: #276744; }
+    .alert.error   { background: #fdf2f2; border: 1.5px solid #f5c0bb; color: #9b2c2c; }
+
+    .success-card { text-align: center; padding: 56px 32px; background: #fff; border: 1.5px solid var(--border); border-radius: 16px; box-shadow: 0 4px 24px rgba(28,20,16,0.06); display: none; }
+    .success-card.show { display: block; animation: fadeup 0.4s ease; }
+    .success-icon { font-size: 3.5rem; margin-bottom: 16px; }
+    .success-title { font-family: 'Fraunces', serif; font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 10px; }
+    .success-title em { font-style: italic; color: var(--red); }
+    .success-msg { font-size: 0.9rem; color: var(--ink-light); line-height: 1.65; max-width: 320px; margin: 0 auto 24px; }
+    .success-badge { display: inline-flex; align-items: center; gap: 7px; padding: 9px 20px; background: #f0faf4; border: 1.5px solid #a7d7b5; border-radius: 100px; font-size: 0.82rem; font-weight: 600; color: #276744; }
+
+    @keyframes fadeup { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    @media (max-width: 480px) {
+      nav { padding: 13px 18px; }
+      .page { padding: 36px 16px 48px; }
+      .bt-grid { grid-template-columns: repeat(4,1fr); gap: 6px; }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-brand">🩸 BloodBridge</a>
+    <div class="nav-links">
+      <a href="search.html">Find Blood</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="donor_profile.html" class="active">My Profile</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="steps">
+      <div class="step done"><div class="step-dot"></div><span>Account</span></div>
+      <div class="step-connector"></div>
+      <div class="step active"><div class="step-dot" style="border-color:var(--red);background:#fdf2f2"><span style="color:var(--red);font-size:0.7rem">2</span></div><span>Profile</span></div>
+      <div class="step-connector"></div>
+      <div class="step"><div class="step-dot"><span>3</span></div><span>Go live</span></div>
+    </div>
+
+    <div id="formSection">
+      <h1 class="page-title">Your donor <em>profile</em></h1>
+      <p class="page-sub">This helps us match you with patients who need your blood type. Your phone number will only be shared when there's a match.</p>
+
+      <div class="section-label">Blood Type</div>
+      <input type="hidden" id="blood_type"/>
+      <div class="bt-grid" id="btGrid">
+        <div class="bt-btn" onclick="selectBT('A+')">A+</div>
+        <div class="bt-btn" onclick="selectBT('A-')">A−</div>
+        <div class="bt-btn" onclick="selectBT('B+')">B+</div>
+        <div class="bt-btn" onclick="selectBT('B-')">B−</div>
+        <div class="bt-btn" onclick="selectBT('AB+')">AB+</div>
+        <div class="bt-btn" onclick="selectBT('AB-')">AB−</div>
+        <div class="bt-btn" onclick="selectBT('O+')">O+</div>
+        <div class="bt-btn" onclick="selectBT('O-')">O−</div>
+      </div>
+
+      <div class="section-label" style="margin-top:26px">Contact & Location</div>
+      <div class="two-col">
+        <div class="field"><label>City</label><input type="text" id="city" placeholder="e.g. Mumbai"/></div>
+        <div class="field"><label>Phone Number</label><input type="tel" id="phone" placeholder="+91 98765 43210"/></div>
+      </div>
+
+      <div class="section-label" style="margin-top:22px">Donation History</div>
+      <div class="field"><label>Last Donated (optional)</label><input type="date" id="last_donated" max=""/></div>
+      <p class="hint">Leave blank if this is your first donation. Donors must wait 3 months between donations.</p>
+
+      <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">Save profile & go live 🩸</button>
+      <div class="alert" id="alertBox"><span id="alertMsg"></span></div>
+    </div>
+
+    <div class="success-card" id="successCard">
+      <div class="success-icon">🩸</div>
+      <div class="success-title">You're <em>live!</em></div>
+      <p class="success-msg">Your donor profile is active. Patients and hospitals in your area can now find you. Thank you for making a difference.</p>
+      <div class="success-badge">✓ Profile active</div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('last_donated').max = new Date().toISOString().split('T')[0];
+
+    if (!localStorage.getItem('token')) {
+      const a = document.getElementById('alertBox');
+      a.className = 'alert show error';
+      document.getElementById('alertMsg').textContent = 'You need to be logged in to save your profile.';
+      a.style.display = 'flex';
+    }
+
+    function selectBT(t) {
+      document.getElementById('blood_type').value = t;
+      document.querySelectorAll('.bt-btn').forEach(b => b.classList.toggle('active', b.textContent.replace('−', '-') === t));
+    }
+
+    function showAlert(type, msg) {
+      const b = document.getElementById('alertBox');
+      b.className = `alert show ${type}`;
+      document.getElementById('alertMsg').textContent = msg;
+      b.style.display = 'flex';
+    }
+
+    async function handleSubmit() {
+      const btn = document.getElementById('submitBtn');
+      const blood_type = document.getElementById('blood_type').value;
+      const city = document.getElementById('city').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const last_donated = document.getElementById('last_donated').value;
+      const tok = localStorage.getItem('token');
+      const userId = localStorage.getItem('user_id');
+
+      if (!blood_type) { showAlert('error', 'Please select your blood type.'); return; }
+      if (!city)       { showAlert('error', 'Please enter your city.'); return; }
+      if (!phone)      { showAlert('error', 'Please enter your phone number.'); return; }
+      if (!tok)        { showAlert('error', 'You must be logged in. Please log in first.'); return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Saving…';
+
+      const payload = { user_id: parseInt(userId), blood_type, city, phone };
+      if (last_donated) payload.last_donated = last_donated;
+
+      try {
+        const res = await fetch('https://bloodbridge-xz4x.onrender.com/donors', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tok}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          document.getElementById('formSection').style.display = 'none';
+          document.getElementById('successCard').classList.add('show');
+        } else {
+          const data = await res.json();
+          showAlert('error', data.detail || data.message || 'Failed to save profile.');
+          btn.disabled = false;
+          btn.textContent = 'Save profile & go live 🩸';
+        }
+      } catch {
+        showAlert('error', 'Could not reach the server.');
+        btn.disabled = false;
+        btn.textContent = 'Save profile & go live 🩸';
+      }
+    }
+  </script>
+</body>
+</html>

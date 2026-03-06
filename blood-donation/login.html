@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Log In — BloodBridge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --red: #c0392b; --red-deep: #96281b; --cream: #faf7f2; --cream-dark: #f0ebe0; --ink: #1c1410; --ink-mid: #4a3f35; --ink-light: #8a7a6e; --border: #ddd5c8; }
+    html, body { min-height: 100%; font-family: 'Instrument Sans', sans-serif; background: var(--cream); color: var(--ink); }
+    body::after { content: ''; position: fixed; inset: 0; z-index: 999; pointer-events: none; opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+    nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 16px 48px; background: var(--cream); border-bottom: 1.5px solid var(--border); }
+    .nav-brand { display: flex; align-items: center; gap: 8px; font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); text-decoration: none; }
+
+    .page { min-height: calc(100vh - 57px); display: flex; align-items: center; justify-content: center; padding: 48px 24px; }
+
+    .card { width: 100%; max-width: 420px; background: #fff; border: 1.5px solid var(--border); border-radius: 16px; padding: 44px 40px; box-shadow: 0 4px 24px rgba(28,20,16,0.06); }
+
+    .card-icon { font-size: 1.8rem; margin-bottom: 14px; }
+    .card-title { font-family: 'Fraunces', serif; font-size: 1.7rem; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 4px; }
+    .card-title em { font-style: italic; color: var(--red); }
+    .card-sub { font-size: 0.875rem; color: var(--ink-light); margin-bottom: 32px; }
+
+    .field { margin-bottom: 18px; }
+    label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-mid); margin-bottom: 7px; }
+
+    .input-wrap { position: relative; }
+    input { width: 100%; padding: 12px 14px; background: var(--cream); border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Instrument Sans', sans-serif; font-size: 0.92rem; color: var(--ink); outline: none; transition: border-color 0.18s, box-shadow 0.18s; }
+    input::placeholder { color: #b8a898; }
+    input:focus { border-color: var(--ink); background: #fff; box-shadow: 0 0 0 3px rgba(28,20,16,0.07); }
+
+    .pw-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--ink-light); font-size: 0.85rem; padding: 4px; transition: color 0.15s; }
+    .pw-toggle:hover { color: var(--ink); }
+
+    .submit-btn { width: 100%; padding: 14px; background: var(--red); color: #fff; border: none; border-radius: 8px; font-family: 'Instrument Sans', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 6px; box-shadow: 0 2px 0 var(--red-deep); transition: all 0.18s; }
+    .submit-btn:hover { background: var(--red-deep); transform: translateY(-1px); box-shadow: 0 4px 0 var(--red-deep); }
+    .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .alert { padding: 12px 14px; border-radius: 8px; font-size: 0.85rem; margin-top: 14px; display: none; gap: 8px; align-items: center; }
+    .alert.show { display: flex; }
+    .alert.success { background: #f0faf4; border: 1.5px solid #a7d7b5; color: #276744; }
+    .alert.error   { background: #fdf2f2; border: 1.5px solid #f5c0bb; color: #9b2c2c; }
+
+    .divider { height: 1px; background: var(--border); margin: 24px 0; }
+    .bottom-link { text-align: center; font-size: 0.85rem; color: var(--ink-light); }
+    .bottom-link a { color: var(--red); text-decoration: none; font-weight: 600; }
+    .bottom-link a:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      nav { padding: 13px 18px; }
+      .card { padding: 32px 22px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-brand">🩸 BloodBridge</a>
+  </nav>
+
+  <div class="page">
+    <div class="card">
+      <div class="card-icon">👋</div>
+      <div class="card-title">Welcome <em>back</em></div>
+      <div class="card-sub">Sign in to manage your donor profile and requests.</div>
+
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="jane@example.com" autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="input-wrap">
+          <input type="password" id="password" placeholder="Your password" autocomplete="current-password"/>
+          <button class="pw-toggle" onclick="togglePw()" title="Show/hide">👁</button>
+        </div>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" onclick="handleLogin()">Sign in →</button>
+
+      <div class="alert" id="alertBox"><span id="alertMsg"></span></div>
+
+      <div class="divider"></div>
+      <div class="bottom-link">No account yet? <a href="register.html">Register for free</a></div>
+    </div>
+  </div>
+
+  <script>
+    function togglePw() { const i = document.getElementById('password'); i.type = i.type === 'password' ? 'text' : 'password'; }
+    function showAlert(type, msg) { const b = document.getElementById('alertBox'); b.className = `alert show ${type}`; document.getElementById('alertMsg').textContent = msg; }
+    async function handleLogin() {
+      const btn = document.getElementById('submitBtn');
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if (!email || !password) { showAlert('error', 'Please enter your email and password.'); return; }
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Signing in…';
+      try {
+        const res = await fetch('https://bloodbridge-xz4x.onrender.com/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+        const data = await res.json();
+        if (res.ok) {
+          const token = data.token || data.access_token;
+          if (token) localStorage.setItem('token', token);
+          showAlert('success', 'Logged in! Redirecting…');
+          setTimeout(() => window.location.href = 'dashboard.html', 1400);
+        } else { showAlert('error', data.detail || data.message || 'Invalid credentials.'); btn.disabled = false; btn.textContent = 'Sign in →'; }
+      } catch { showAlert('error', 'Could not reach the server.'); btn.disabled = false; btn.textContent = 'Sign in →'; }
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+  </script>
+</body>
+</html>

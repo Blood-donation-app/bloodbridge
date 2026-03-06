@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — BloodBridge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --red: #c0392b; --red-deep: #96281b; --cream: #faf7f2; --cream-dark: #f0ebe0; --ink: #1c1410; --ink-mid: #4a3f35; --ink-light: #8a7a6e; --border: #ddd5c8; }
+    html, body { min-height: 100%; font-family: 'Instrument Sans', sans-serif; background: var(--cream); color: var(--ink); }
+    body::after { content: ''; position: fixed; inset: 0; z-index: 999; pointer-events: none; opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+    nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 16px 48px; background: var(--cream); border-bottom: 1.5px solid var(--border); }
+    .nav-brand { display: flex; align-items: center; gap: 8px; font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); text-decoration: none; }
+    .nav-links { display: flex; gap: 2px; }
+    .nav-links a { padding: 7px 15px; border-radius: 6px; font-size: 0.875rem; font-weight: 500; text-decoration: none; color: var(--ink-mid); transition: all 0.16s; }
+    .nav-links a:hover { background: var(--cream-dark); color: var(--ink); }
+    .nav-links a.active { background: var(--cream-dark); color: var(--ink); font-weight: 600; }
+
+    .page { max-width: 1000px; margin: 0 auto; padding: 52px 24px 64px; }
+
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 40px; }
+    .page-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+    .page-title em { font-style: italic; color: var(--red); }
+    .page-sub { font-size: 0.875rem; color: var(--ink-light); margin-top: 4px; }
+    .last-upd { font-size: 0.75rem; color: var(--ink-light); margin-top: 4px; }
+
+    .refresh-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #fff; border: 1.5px solid var(--border); border-radius: 7px; font-family: 'Instrument Sans', sans-serif; font-size: 0.82rem; font-weight: 500; color: var(--ink-mid); cursor: pointer; transition: all 0.16s; }
+    .refresh-btn:hover { border-color: var(--ink-mid); color: var(--ink); }
+    .refresh-btn svg { transition: transform 0.3s; }
+    .refresh-btn.spin svg { animation: rotspin 0.7s linear infinite; }
+    @keyframes rotspin { to { transform: rotate(360deg); } }
+
+    /* STAT CARDS */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(185px,1fr)); gap: 14px; margin-bottom: 36px; }
+    .stat-card { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 22px 20px; transition: box-shadow 0.18s; }
+    .stat-card:hover { box-shadow: 0 4px 20px rgba(28,20,16,0.08); }
+    .stat-card.red-tint { border-color: #f5c0bb; background: #fdf2f2; }
+    .stat-icon { font-size: 1.3rem; margin-bottom: 10px; }
+    .stat-val { font-family: 'Fraunces', serif; font-size: 2.4rem; font-weight: 700; letter-spacing: -1.5px; line-height: 1; color: var(--ink); }
+    .stat-val.red { color: var(--red); }
+    .stat-val.green { color: #166534; }
+    .stat-val.amber { color: #92400e; }
+    .stat-lbl { font-size: 0.76rem; color: var(--ink-light); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 5px; }
+
+    /* skeleton */
+    .skel { background: var(--cream-dark); border-radius: 5px; animation: shimmer 1.3s ease-in-out infinite; }
+    .sv { height: 40px; width: 55px; margin-bottom: 6px; }
+    .sl { height: 11px; width: 75px; }
+    @keyframes shimmer { 0%,100%{opacity:0.6} 50%{opacity:1} }
+
+    /* TWO COL */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    .section { background: #fff; border: 1.5px solid var(--border); border-radius: 14px; padding: 26px 24px; }
+    .sec-title { font-family: 'Fraunces', serif; font-size: 1.1rem; font-weight: 600; letter-spacing: -0.2px; margin-bottom: 22px; }
+    .sec-title em { font-style: italic; color: var(--red); }
+
+    /* blood breakdown */
+    .bt-row { display: flex; align-items: center; gap: 10px; margin-bottom: 13px; }
+    .bt-row:last-child { margin-bottom: 0; }
+    .bt-lbl { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 700; color: var(--red); width: 36px; flex-shrink: 0; letter-spacing: -0.3px; }
+    .bt-track { flex: 1; height: 5px; background: var(--cream-dark); border-radius: 100px; overflow: hidden; }
+    .bt-fill { height: 100%; background: var(--red); border-radius: 100px; opacity: 0.7; transition: width 0.7s cubic-bezier(0.4,0,0.2,1); width: 0; }
+    .bt-count { font-size: 0.8rem; font-weight: 600; color: var(--ink-light); width: 24px; text-align: right; flex-shrink: 0; }
+
+    /* request cards */
+    .req-list { display: flex; flex-direction: column; gap: 10px; }
+    .req-card { border: 1.5px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; transition: border-color 0.16s; }
+    .req-card:hover { border-color: #f5c0bb; }
+    .req-left { flex: 1; min-width: 0; }
+    .req-hospital { font-weight: 600; font-size: 0.88rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .req-meta { font-size: 0.76rem; color: var(--ink-light); }
+    .req-blood { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 700; color: var(--red); flex-shrink: 0; line-height: 1; margin-top: 2px; }
+    .utag { display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; padding: 3px 8px; border-radius: 100px; margin-top: 5px; }
+    .utag.emergency { background: #fdf2f2; color: var(--red); border: 1.5px solid #f5c0bb; }
+    .utag.urgent    { background: #fff7ed; color: #9a3412; border: 1.5px solid #fcd9b0; }
+    .utag.normal    { background: #f0faf4; color: #166534; border: 1.5px solid #a7d7b5; }
+
+    .empty-sec { text-align: center; padding: 32px; font-size: 0.875rem; color: var(--ink-light); }
+
+    @media (max-width: 660px) {
+      nav { padding: 13px 18px; }
+      .two-col { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-brand">🩸 BloodBridge</a>
+    <div class="nav-links">
+      <a href="search.html">Find Blood</a>
+      <a href="dashboard.html" class="active">Dashboard</a>
+      <a href="donor_profile.html">My Profile</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Live <em>dashboard</em></div>
+        <div class="page-sub">Real-time overview of the BloodBridge network.</div>
+        <div class="last-upd" id="lastUpd">Loading…</div>
+      </div>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadAll()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Refresh
+      </button>
+    </div>
+
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card"><div class="skel sv"></div><div class="skel sl"></div></div>
+      <div class="stat-card"><div class="skel sv"></div><div class="skel sl"></div></div>
+      <div class="stat-card"><div class="skel sv"></div><div class="skel sl"></div></div>
+      <div class="stat-card"><div class="skel sv"></div><div class="skel sl"></div></div>
+    </div>
+
+    <div class="two-col">
+      <div class="section">
+        <div class="sec-title">Donors by <em>blood type</em></div>
+        <div id="btBreak"><div class="empty-sec">Loading…</div></div>
+      </div>
+      <div class="section">
+        <div class="sec-title">Recent <em>requests</em></div>
+        <div id="reqList"><div class="empty-sec">Loading…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BTS = ['O+','O-','A+','A-','B+','B-','AB+','AB-'];
+
+    async function loadAll() {
+      const btn = document.getElementById('refreshBtn');
+      btn.classList.add('spin');
+      await Promise.all([loadDonors(), loadRequests()]);
+      btn.classList.remove('spin');
+      document.getElementById('lastUpd').textContent = 'Updated at ' + new Date().toLocaleTimeString();
+    }
+
+    async function loadDonors() {
+      try {
+        const res = await fetch('https://bloodbridge-xz4x.onrender.com/donors');
+        const donors = await res.json();
+        renderStats(donors);
+        renderBT(donors);
+      } catch { renderStatsError(); document.getElementById('btBreak').innerHTML = '<div class="empty-sec">⚠️ Could not load.</div>'; }
+    }
+
+    function renderStats(donors) {
+      const total = donors.length;
+      const avail = donors.filter(d => d.available || d.is_available).length;
+      const types = new Set(donors.map(d => d.blood_type || d.bloodType)).size;
+      document.getElementById('statsRow').innerHTML = `
+        <div class="stat-card red-tint"><div class="stat-icon">💉</div><div class="stat-val red">${total}</div><div class="stat-lbl">Total Donors</div></div>
+        <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-val green">${avail}</div><div class="stat-lbl">Available Now</div></div>
+        <div class="stat-card"><div class="stat-icon">⏸</div><div class="stat-val">${total-avail}</div><div class="stat-lbl">Unavailable</div></div>
+        <div class="stat-card"><div class="stat-icon">🔬</div><div class="stat-val amber">${types}</div><div class="stat-lbl">Blood Types Active</div></div>`;
+    }
+    function renderStatsError() {
+      document.getElementById('statsRow').innerHTML = '<div class="stat-card" style="grid-column:1/-1;text-align:center;color:var(--ink-light);padding:32px">⚠️ Could not load donor data.</div>';
+    }
+
+    function renderBT(donors) {
+      const counts = {}; BTS.forEach(t => counts[t] = 0);
+      donors.forEach(d => { const t = d.blood_type||d.bloodType; if(counts[t]!==undefined) counts[t]++; });
+      const max = Math.max(...Object.values(counts), 1);
+      const sorted = BTS.map(t => ({t, c: counts[t]})).sort((a,b) => b.c-a.c);
+      document.getElementById('btBreak').innerHTML = sorted.map(({t,c}) =>
+        `<div class="bt-row"><div class="bt-lbl">${t}</div><div class="bt-track"><div class="bt-fill" style="width:${Math.round(c/max*100)}%"></div></div><div class="bt-count">${c}</div></div>`
+      ).join('');
+    }
+
+    async function loadRequests() {
+      try {
+        const res = await fetch('https://bloodbridge-xz4x.onrender.com/blood-requests');
+        const all = await res.json();
+        const reqs = Array.isArray(all) ? all : (all.requests||[]);
+        const open = reqs.filter(r => r.status==='open' || r.is_open || !r.status);
+
+        // update open req stat
+        const statsRow = document.getElementById('statsRow');
+        const existing = document.getElementById('openReqStat');
+        const card = `<div id="openReqStat" class="stat-card"><div class="stat-icon">🚨</div><div class="stat-val amber">${open.length}</div><div class="stat-lbl">Open Requests</div></div>`;
+        if (!existing && statsRow.children.length >= 3) { statsRow.insertAdjacentHTML('beforeend', card); }
+        else if (existing) { existing.outerHTML = card; }
+
+        const recent = open.slice(0,5);
+        if (!recent.length) { document.getElementById('reqList').innerHTML = '<div class="empty-sec">🎉 No open requests right now</div>'; return; }
+        document.getElementById('reqList').innerHTML = `<div class="req-list">${recent.map(r => {
+          const u = (r.urgency||'normal').toLowerCase();
+          const em = u==='emergency'?'🔴':u==='urgent'?'🟠':'🟢';
+          return `<div class="req-card">
+            <div class="req-left">
+              <div class="req-hospital">${r.hospital_name||r.hospital||'Unknown'}</div>
+              <div class="req-meta">📍 ${r.city||'—'} &nbsp;·&nbsp; ${r.units_needed||1} unit${(r.units_needed||1)!==1?'s':''}</div>
+              <div class="utag ${u}">${em} ${r.urgency||'Normal'}</div>
+            </div>
+            <div class="req-blood">${r.blood_type||r.bloodType||'?'}</div>
+          </div>`;
+        }).join('')}</div>`;
+      } catch { document.getElementById('reqList').innerHTML = '<div class="empty-sec">⚠️ Could not load requests.</div>'; }
+    }
+
+    loadAll();
+    setInterval(loadAll, 60000);
+  </script>
+</body>
+</html>

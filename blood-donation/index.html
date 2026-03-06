@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BloodBridge — Find Blood. Save Lives.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --red: #c0392b; --red-deep: #96281b;
+      --cream: #faf7f2; --cream-dark: #f0ebe0;
+      --ink: #1c1410; --ink-mid: #4a3f35; --ink-light: #8a7a6e;
+      --border: #ddd5c8;
+      --radius: 24px;
+    }
+    html, body { min-height: 100%; font-family: 'Instrument Sans', sans-serif; background: var(--cream); color: var(--ink); overflow-x: hidden; }
+
+    /* paper grain */
+    body::after {
+      content: ''; position: fixed; inset: 0; z-index: 999; pointer-events: none; opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 48px; background: rgba(250, 247, 242, 0.85); backdrop-filter: blur(10px); border-bottom: 1.5px solid var(--border);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 8px; font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); text-decoration: none; letter-spacing: -0.3px; }
+    .nav-links { display: flex; align-items: center; gap: 2px; }
+    .nav-links a { padding: 7px 15px; border-radius: 6px; font-size: 0.875rem; font-weight: 500; text-decoration: none; color: var(--ink-mid); transition: all 0.16s; }
+    .nav-links a:hover { background: var(--cream-dark); color: var(--ink); }
+    .nav-links a.cta { background: var(--ink); color: var(--cream); margin-left: 6px; }
+    .nav-links a.cta:hover { background: var(--red); }
+
+    /* HERO */
+    .hero { max-width: 1200px; margin: 0 auto; padding: 80px 48px; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 64px; align-items: center; }
+    .hero-content { position: relative; z-index: 2; }
+    .hero-kicker { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--red); margin-bottom: 18px; }
+    .kicker-line { width: 24px; height: 1.5px; background: var(--red); flex-shrink: 0; }
+
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      font-weight: 700; line-height: 0.95; letter-spacing: -2px;
+      color: var(--ink); margin-bottom: 24px;
+    }
+    h1 em { font-style: italic; color: var(--red); font-weight: 500; }
+
+    .hero-sub { font-size: 1.15rem; color: var(--ink-mid); line-height: 1.6; max-width: 480px; margin-bottom: 40px; }
+
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 10px; padding: 16px 32px; border-radius: 12px; font-family: 'Instrument Sans', sans-serif; font-size: 1rem; font-weight: 600; text-decoration: none; cursor: pointer; border: none; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+    .btn-red { background: var(--red); color: #fff; box-shadow: 0 4px 14px rgba(192,57,43,0.3); }
+    .btn-red:hover { background: var(--red-deep); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(192,57,43,0.4); }
+    .btn-outline { background: #fff; color: var(--ink); border: 1.5px solid var(--border); }
+    .btn-outline:hover { border-color: var(--ink); background: var(--cream); transform: translateY(-2px); }
+
+    /* Hero Image Wrapper */
+    .hero-image-wrap { position: relative; height: 100%; min-height: 500px; border-radius: var(--radius); overflow: hidden; transform: rotate(2deg); transition: transform 0.6s ease; border: 8px solid #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+    .hero-image-wrap:hover { transform: rotate(0deg) scale(1.02); }
+    .hero-image-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* STRIP */
+    .strip { border-top: 1.5px solid var(--border); border-bottom: 1.5px solid var(--border); background: var(--cream-dark); padding: 20px 48px; display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+    .strip-item { font-size: 0.85rem; color: var(--ink-mid); display: flex; align-items: center; gap: 6px; }
+    .strip-item strong { color: var(--ink); font-weight: 600; }
+
+    /* FEATURES */
+    .features { max-width: 1200px; margin: 0 auto; padding: 100px 48px; }
+    .feat-hd { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 48px; flex-wrap: wrap; gap: 20px; }
+    .feat-hd h2 { font-family: 'Fraunces', serif; font-size: 2.8rem; font-weight: 600; letter-spacing: -1px; }
+    .feat-hd h2 em { font-style: italic; color: var(--red); }
+    .feat-hd p { font-size: 1rem; color: var(--ink-mid); max-width: 320px; line-height: 1.5; }
+    
+    .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .feat { padding: 40px; border: 1.5px solid var(--border); border-radius: var(--radius); background: #fff; transition: all 0.3s ease; position: relative; overflow: hidden; }
+    .feat:hover { transform: translateY(-8px); border-color: var(--red); box-shadow: 0 15px 30px rgba(0,0,0,0.05); }
+    .feat-n { font-family: 'Fraunces', serif; font-size: 0.85rem; color: var(--red); margin-bottom: 24px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+    .feat-img { width: 100%; height: 180px; border-radius: 12px; object-fit: cover; margin-bottom: 24px; }
+    .feat-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 12px; font-family: 'Fraunces', serif; }
+    .feat-desc { font-size: 0.95rem; color: var(--ink-mid); line-height: 1.6; }
+
+    footer { border-top: 1.5px solid var(--border); padding: 40px 48px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; font-size: 0.85rem; color: var(--ink-light); }
+
+    @media (max-width: 1024px) {
+      .hero { grid-template-columns: 1fr; gap: 40px; padding-top: 40px; }
+      .hero-image-wrap { min-height: 400px; transform: none; }
+      .feat-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      nav { padding: 13px 18px; }
+      .hero { padding: 40px 18px; }
+      .strip { padding: 20px 18px; }
+      .features { padding: 60px 18px; }
+      footer { padding: 30px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-brand">🩸 BloodBridge</a>
+    <div class="nav-links">
+      <a href="search.html">Find Blood</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="login.html">Log in</a>
+      <a href="register.html" class="cta">Register</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-kicker"><span class="kicker-line"></span>Blood Donor Network</div>
+      <h1>Find blood.<br><em>Save lives.</em><br>Instantly.</h1>
+      <p class="hero-sub">BloodBridge connects patients and hospitals with verified blood donors nearby — in minutes, not hours.</p>
+      <div class="hero-actions">
+        <a href="register.html?role=donor" class="btn btn-red">🩸 I'm a Donor</a>
+        <a href="register.html?role=hospital" class="btn btn-outline">🏥 I Need Blood</a>
+      </div>
+    </div>
+    <div class="hero-image-wrap">
+     <img src="https://wallpapers.com/images/hd/blood-donation-awareness-kljr9bpv4vaukn76.png" alt="Blood Donation">
+ 
+    </div>
+  </section>
+
+  <div class="strip">
+    <span class="strip-item">✓ All <strong>8 blood types</strong> covered</span>
+    <span class="strip-item">✓ Verified donors only</span>
+    <span class="strip-item">✓ <strong>Free</strong> to use, always</span>
+    <span class="strip-item">✓ No sign-up needed to search</span>
+    <span class="strip-item">✓ Works on any device</span>
+  </div>
+
+  <section class="features">
+    <div class="feat-hd">
+      <h2>How it <em>works</em></h2>
+      <p>Simple enough to use in an emergency. Powerful enough to save lives.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat">
+        <div class="feat-n">Step one</div>
+        
+        <div class="feat-title">Search nearby donors</div>
+        <div class="feat-desc">Filter by blood type and city. See real availability and contact donors directly.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-n">Step two</div>
+        
+        <div class="feat-title">Send emergency requests</div>
+        <div class="feat-desc">Hospitals broadcast urgent needs instantly. Matching donors are notified right away.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-n">Step three</div>
+        
+        <div class="feat-title">Donate & save a life</div>
+        <div class="feat-desc">Register as a donor in under 2 minutes. Update your availability any time.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>© 2025 BloodBridge</span>
+    <span>Built with care for a hackathon 🩸</span>
+  </footer>
+</body>
+</html>
