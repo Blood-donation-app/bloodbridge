@@ -1,0 +1,95 @@
+# BloodBridge API
+
+Connecting blood donors with hospitals in real time.
+
+## Setup
+
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Run the server
+uvicorn main:app --reload
+```
+
+The server starts at **http://localhost:8000**  
+Interactive docs at **http://localhost:8000/docs**
+
+---
+
+## Endpoints
+
+| Method | Path             | Description                          |
+|--------|------------------|--------------------------------------|
+| GET    | /health          | Health check                         |
+| POST   | /register        | Register a new user                  |
+| POST   | /login           | Login and receive token              |
+| GET    | /donors          | List donors (filter: city, blood_type) |
+| POST   | /donors          | Create a donor profile               |
+| GET    | /blood-requests  | List blood requests (filter: city, blood_type, status) |
+| POST   | /blood-requests  | Submit a new blood request           |
+| GET    | /inventory       | List hospital inventory (filter: city, blood_type) |
+| POST   | /inventory       | Add/update hospital inventory        |
+
+---
+
+## Seed Data
+
+On first startup, 5 donors are automatically seeded:
+
+| Name             | City       | Blood Type | Email                |
+|------------------|------------|------------|----------------------|
+| Alice Fernandes  | Mumbai     | O+         | alice@example.com    |
+| Ravi Kumar       | Delhi      | A-         | ravi@example.com     |
+| Priya Singh      | Bangalore  | B+         | priya@example.com    |
+| Omar Sheikh      | Hyderabad  | AB+        | omar@example.com     |
+| Sneha Patil      | Pune       | O-         | sneha@example.com    |
+
+All seed users have password: `password123`
+
+---
+
+## Example Requests
+
+### Register
+```bash
+curl -X POST http://localhost:8000/register \
+  -H "Content-Type: application/json" \
+  -d '{"name": "John Doe", "email": "john@example.com", "password": "secret123", "role": "donor"}'
+```
+
+### Login
+```bash
+curl -X POST http://localhost:8000/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "alice@example.com", "password": "password123"}'
+```
+
+### Find O+ donors in Mumbai
+```bash
+curl "http://localhost:8000/donors?city=Mumbai&blood_type=O%2B"
+```
+
+### Create emergency blood request
+```bash
+curl -X POST http://localhost:8000/blood-requests \
+  -H "Content-Type: application/json" \
+  -d '{"hospital_name": "Apollo Hospital", "blood_type": "O+", "city": "Mumbai", "units_needed": 3, "urgency": "emergency"}'
+```
+
+---
+
+## Project Structure
+
+```
+bloodbridge/
+├── main.py          # FastAPI app, endpoints, seed data
+├── database.py      # SQLAlchemy engine & session
+├── models.py        # ORM models (User, Donor, BloodRequest, Inventory)
+├── schemas.py       # Pydantic request/response schemas
+├── requirements.txt
+└── bloodbridge.db   # SQLite DB (auto-created on first run)
+```
+
+> **Note:** The `/login` endpoint returns a placeholder token string.  
+> Replace with `python-jose` JWT tokens before going to production.
