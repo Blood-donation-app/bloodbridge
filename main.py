@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from datetime import datetime
 from api import router as donor_router
-from fastapi.staticfiles import StaticFiles
 import uuid
 
 from database import engine, get_db, Base
@@ -27,7 +26,7 @@ app.add_middleware(
 )
 
 app.include_router(donor_router)
-app.mount("/app", StaticFiles(directory="blood-donation", html=True), name="frontend")
+
 
 # ── Password Hashing ───────────────────────────────────────────────────────────
 
