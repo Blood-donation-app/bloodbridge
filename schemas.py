@@ -42,7 +42,7 @@ class UserResponse(BaseModel):
 # ── Auth Schemas ───────────────────────────────────────────────────────────────
 
 class LoginRequest(BaseModel):
-    email:    EmailStr
+    email:    str
     password: str
 
 class LoginResponse(BaseModel):

@@ -90,26 +90,59 @@
   </div>
 
   <script>
-    function togglePw() { const i = document.getElementById('password'); i.type = i.type === 'password' ? 'text' : 'password'; }
-    function showAlert(type, msg) { const b = document.getElementById('alertBox'); b.className = `alert show ${type}`; document.getElementById('alertMsg').textContent = msg; }
+    function togglePw() {
+      const i = document.getElementById('password');
+      i.type = i.type === 'password' ? 'text' : 'password';
+    }
+
+    function showAlert(type, msg) {
+      const b = document.getElementById('alertBox');
+      b.className = `alert show ${type}`;
+      document.getElementById('alertMsg').textContent = msg;
+      b.style.display = 'flex';
+    }
+
     async function handleLogin() {
       const btn = document.getElementById('submitBtn');
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
-      if (!email || !password) { showAlert('error', 'Please enter your email and password.'); return; }
-      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Signing in…';
+
+      if (!email || !password) {
+        showAlert('error', 'Please enter your email and password.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Signing in…';
+
       try {
-        const res = await fetch('https://bloodbridge-xz4x.onrender.com/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+        const res = await fetch('https://bloodbridge-xz4x.onrender.com/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, password: password })
+        });
+
         const data = await res.json();
+
         if (res.ok) {
-          const token = data.token || data.access_token;
-        if (token) localStorage.setItem('token', token);
-        if (data.user) localStorage.setItem('user_id', data.user.id);
+          const token = data.access_token || data.token;
+          if (token) localStorage.setItem('token', token);
+          if (data.user && data.user.id) localStorage.setItem('user_id', String(data.user.id));
           showAlert('success', 'Logged in! Redirecting…');
           setTimeout(() => window.location.href = 'dashboard.html', 1400);
-        } else { showAlert('error', data.detail || data.message || 'Invalid credentials.'); btn.disabled = false; btn.textContent = 'Sign in →'; }
-      } catch { showAlert('error', 'Could not reach the server.'); btn.disabled = false; btn.textContent = 'Sign in →'; }
+        } else {
+          const errMsg = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail) || 'Invalid credentials.';
+          showAlert('error', errMsg);
+          btn.disabled = false;
+          btn.textContent = 'Sign in →';
+        }
+      } catch (err) {
+        showAlert('error', 'Could not reach the server.');
+        btn.disabled = false;
+        btn.textContent = 'Sign in →';
+      }
     }
+
     document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
   </script>
 </body>
