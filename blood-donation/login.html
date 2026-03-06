@@ -103,7 +103,8 @@
         const data = await res.json();
         if (res.ok) {
           const token = data.token || data.access_token;
-          if (token) localStorage.setItem('token', token);
+        if (token) localStorage.setItem('token', token);
+        if (data.user) localStorage.setItem('user_id', data.user.id);
           showAlert('success', 'Logged in! Redirecting…');
           setTimeout(() => window.location.href = 'dashboard.html', 1400);
         } else { showAlert('error', data.detail || data.message || 'Invalid credentials.'); btn.disabled = false; btn.textContent = 'Sign in →'; }
